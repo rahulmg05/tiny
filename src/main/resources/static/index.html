@@ -5,16 +5,62 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>URL Shortener</title>
     <style>
+        :root {
+            /* Light theme variables */
+            --bg-color: #ffffff;
+            --text-color: #333333;
+            --border-color: #ddd;
+            --container-bg: #ffffff;
+            --input-bg: #ffffff;
+            --result-bg: #f9f9f9;
+            --info-bg: #ffffff;
+            --info-label-color: #555;
+            --link-color: #0066cc;
+            --button-bg: #4CAF50;
+            --button-color: white;
+            --button-hover: #45a049;
+            --secondary-button-bg: #f0f0f0;
+            --secondary-button-color: #000000;
+            --error-color: #ff0000;
+            --shadow-color: rgba(0,0,0,0.1);
+            --small-text-color: #666;
+        }
+
+        /* Dark theme variables */
+        .dark-mode {
+            --bg-color: #121212;
+            --text-color: #e0e0e0;
+            --border-color: #444;
+            --container-bg: #1e1e1e;
+            --input-bg: #2d2d2d;
+            --result-bg: #2d2d2d;
+            --info-bg: #2d2d2d;
+            --info-label-color: #aaa;
+            --link-color: #4da6ff;
+            --button-bg: #388e3c;
+            --button-color: #e0e0e0;
+            --button-hover: #2e7d32;
+            --secondary-button-bg: #555555;
+            --secondary-button-color: #ffffff;
+            --error-color: #ff6b6b;
+            --shadow-color: rgba(0,0,0,0.3);
+            --small-text-color: #aaa;
+        }
+
         body {
             font-family: Arial, sans-serif;
             max-width: 600px;
             margin: 0 auto;
             padding: 20px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: background-color 0.3s, color 0.3s;
         }
         .container {
-            border: 1px solid #ddd;
+            border: 1px solid var(--border-color);
             padding: 20px;
             border-radius: 5px;
+            background-color: var(--container-bg);
         }
         .form-group {
             margin-bottom: 15px;
@@ -27,74 +73,109 @@
             width: 100%;
             padding: 8px;
             box-sizing: border-box;
+            background-color: var(--input-bg);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
         }
         button {
             padding: 8px 15px;
-            background-color: #4CAF50;
-            color: white;
+            background-color: var(--button-bg);
+            color: var(--button-color);
             border: none;
             border-radius: 4px;
             cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        button:hover {
+            background-color: var(--button-hover);
         }
         #result {
             margin-top: 20px;
             padding: 15px;
-            border: 1px solid #ddd;
+            border: 1px solid var(--border-color);
             border-radius: 5px;
             display: none;
-            background-color: #f9f9f9;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            background-color: var(--result-bg);
+            box-shadow: 0 2px 4px var(--shadow-color);
         }
         .url-container {
             display: flex;
             align-items: center;
             margin-bottom: 15px;
-            background-color: white;
+            background-color: var(--info-bg);
             padding: 10px;
             border-radius: 4px;
-            border: 1px solid #eee;
+            border: 1px solid var(--border-color);
         }
         .url-link {
             flex-grow: 1;
             word-break: break-all;
-            color: #0066cc;
+            color: var(--link-color);
             font-weight: 500;
         }
         .copy-btn {
             margin-left: 10px;
             padding: 6px 12px;
-            background-color: #4CAF50;
-            color: white;
+            background-color: var(--button-bg);
+            color: var(--button-color);
             border: none;
             border-radius: 3px;
             cursor: pointer;
             transition: background-color 0.2s;
         }
         .copy-btn:hover {
-            background-color: #45a049;
+            background-color: var(--button-hover);
         }
         .info-item {
             margin-bottom: 8px;
             padding: 8px;
-            background-color: white;
+            background-color: var(--info-bg);
             border-radius: 4px;
-            border: 1px solid #eee;
+            border: 1px solid var(--border-color);
         }
         .info-label {
             font-weight: bold;
-            color: #555;
+            color: var(--info-label-color);
             margin-right: 5px;
         }
         .info-value {
             word-break: break-all;
         }
         .error {
-            color: red;
+            color: var(--error-color);
             margin-top: 10px;
+        }
+        small {
+            color: var(--small-text-color);
+        }
+        .theme-toggle {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 10px;
+        }
+        .theme-toggle-btn {
+            background-color: var(--secondary-button-bg);
+            color: var(--secondary-button-color);
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 14px;
+        }
+        .theme-toggle-btn:hover {
+            opacity: 0.9;
         }
     </style>
 </head>
 <body>
+    <div class="theme-toggle">
+        <button id="themeToggle" class="theme-toggle-btn">
+            <span id="themeIcon">🌙</span> <span id="themeText">Dark Mode</span>
+        </button>
+    </div>
     <div class="container">
         <h1>URL Shortener</h1>
         <div class="form-group">
@@ -139,6 +220,44 @@
     </div>
 
     <script>
+        // Theme toggle functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const themeToggleBtn = document.getElementById('themeToggle');
+            const themeIcon = document.getElementById('themeIcon');
+            const themeText = document.getElementById('themeText');
+            const htmlElement = document.documentElement;
+
+            // Check if user has a saved preference
+            const savedTheme = localStorage.getItem('theme');
+
+            // Apply saved theme or default to light
+            if (savedTheme === 'dark') {
+                htmlElement.classList.add('dark-mode');
+                themeIcon.textContent = '☀️';
+                themeText.textContent = 'Light Mode';
+            }
+
+            // Toggle theme when button is clicked
+            themeToggleBtn.addEventListener('click', function() {
+                // Toggle dark mode class
+                htmlElement.classList.toggle('dark-mode');
+
+                // Check if dark mode is now active
+                const isDarkMode = htmlElement.classList.contains('dark-mode');
+
+                // Update button text and icon
+                if (isDarkMode) {
+                    themeIcon.textContent = '☀️';
+                    themeText.textContent = 'Light Mode';
+                    localStorage.setItem('theme', 'dark');
+                } else {
+                    themeIcon.textContent = '🌙';
+                    themeText.textContent = 'Dark Mode';
+                    localStorage.setItem('theme', 'light');
+                }
+            });
+        });
+
         // Store the current short URL for the copy function
         let currentShortUrl = '';
 
