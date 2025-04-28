@@ -59,19 +59,4 @@ public class UrlController {
     response.setShortCode(shortCode);
     return ResponseEntity.ok(response);
   }
-
-  /**
-   * Update the expiration time of a URL by its short code.
-   *
-   * @param shortCode         the short code of the URL to update
-   * @param expirationMinutes the new expiration time in minutes (null means no expiration)
-   * @return the updated URL information
-   */
-  @PatchMapping("/api/urls/{shortCode}")
-  public ResponseEntity<UrlResponseDto> updateUrlExpiration(
-    @PathVariable final String shortCode,
-    @RequestParam(required = false) final Integer expirationMinutes) {
-    final UrlResponseDto response = urlService.updateUrlExpiration(shortCode, expirationMinutes);
-    return ResponseEntity.ok(response);
-  }
 }
