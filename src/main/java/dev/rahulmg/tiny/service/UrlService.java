@@ -46,8 +46,8 @@ public class UrlService {
 
   /**
    * Handle the case when the URL already exists in the database.
-   * 
-   * @param url the existing URL entity
+   *
+   * @param url    the existing URL entity
    * @param urlDto the URL data transfer object
    * @return the response with the short URL information
    */
@@ -56,7 +56,7 @@ public class UrlService {
 
     // Check if a new custom alias is provided
     if (!ObjectUtils.isEmpty(urlDto.getCustomAlias())) {
-      String newAlias = urlDto.getCustomAlias();
+      final String newAlias = urlDto.getCustomAlias();
 
       // If the alias is different from the current one, update it
       if (!newAlias.equals(url.getShortCode())) {
@@ -73,7 +73,7 @@ public class UrlService {
 
     // Check if a new expiration time is provided
     if (!ObjectUtils.isEmpty(urlDto.getExpirationMinutes())) {
-      LocalDateTime newExpiresAt = calculateExpirationTime(urlDto, url.getCreatedAt());
+      final LocalDateTime newExpiresAt = calculateExpirationTime(urlDto, url.getCreatedAt());
 
       // Update the expiration time
       url.setExpiresAt(newExpiresAt);
@@ -90,7 +90,7 @@ public class UrlService {
 
   /**
    * Create a new short URL when the original URL doesn't exist in the database.
-   * 
+   *
    * @param urlDto the URL data transfer object
    * @return the response with the short URL information
    */
@@ -98,7 +98,7 @@ public class UrlService {
     final String shortCode = determineShortCode(urlDto);
 
     final LocalDateTime createdAt = LocalDateTime.now();
-    LocalDateTime expiresAt = calculateExpirationTime(urlDto, createdAt);
+    final LocalDateTime expiresAt = calculateExpirationTime(urlDto, createdAt);
 
     final Url url = new Url();
     url.setOriginalUrl(urlDto.getUrl());
@@ -113,29 +113,9 @@ public class UrlService {
   }
 
   /**
-   * Determine the short code to use based on the URL DTO.
-   * 
-   * @param urlDto the URL data transfer object
-   * @return the short code to use
-   */
-  private String determineShortCode(final UrlDto urlDto) {
-    if (!ObjectUtils.isEmpty(urlDto.getCustomAlias())) {
-      // Use custom alias if provided
-      String customAlias = urlDto.getCustomAlias();
-      if (urlRepository.existsByShortCode(customAlias)) {
-        throw new UrlException("Custom alias already in use");
-      }
-      return customAlias;
-    } else {
-      // Generate a random short code
-      return generateShortCode();
-    }
-  }
-
-  /**
    * Calculate the expiration time based on the URL DTO.
-   * 
-   * @param urlDto the URL data transfer object
+   *
+   * @param urlDto    the URL data transfer object
    * @param createdAt the creation time
    * @return the expiration time, or null if no expiration
    */
@@ -144,6 +124,26 @@ public class UrlService {
       return createdAt.plusMinutes(urlDto.getExpirationMinutes());
     }
     return null;
+  }
+
+  /**
+   * Determine the short code to use based on the URL DTO.
+   *
+   * @param urlDto the URL data transfer object
+   * @return the short code to use
+   */
+  private String determineShortCode(final UrlDto urlDto) {
+    if (!ObjectUtils.isEmpty(urlDto.getCustomAlias())) {
+      // Use custom alias if provided
+      final String customAlias = urlDto.getCustomAlias();
+      if (urlRepository.existsByShortCode(customAlias)) {
+        throw new UrlException("Custom alias already in use");
+      }
+      return customAlias;
+    } else {
+      // Generate a random short code
+      return generateShortCode();
+    }
   }
 
   /**
@@ -194,7 +194,7 @@ public class UrlService {
   /**
    * Update the expiration time of a URL by its short code.
    *
-   * @param shortCode the short code of the URL to update
+   * @param shortCode         the short code of the URL to update
    * @param expirationMinutes the new expiration time in minutes (null means no expiration)
    * @return the updated URL information
    * @throws UrlException if the URL is not found

@@ -1,7 +1,9 @@
 # Teeny Tiny
+
 A URL shortening service.
 
 ## Features
+
 - Create short URLs from long URLs
 - Optional custom aliases for short URLs
 - Optional expiration time for URLs

@@ -23,190 +23,188 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class UrlServiceTest {
 
-    @Mock
-    private UrlRepository urlRepository;
+  private final String baseUrl = "http://localhost:8080";
+  private final String originalUrl = "https://example.com";
+  private final String existingShortCode = "abc123";
+  private final String newAlias = "newAlias";
+  @Mock
+  private UrlRepository urlRepository;
+  @InjectMocks
+  private UrlService urlService;
 
-    @InjectMocks
-    private UrlService urlService;
+  @BeforeEach
+  void setUp() {
+    ReflectionTestUtils.setField(urlService, "baseUrl", baseUrl);
+  }
 
-    private final String baseUrl = "http://localhost:8080";
-    private final String originalUrl = "https://example.com";
-    private final String existingShortCode = "abc123";
-    private final String newAlias = "newAlias";
+  @Test
+  void shouldUpdateAliasWhenUrlExistsAndNewAliasProvided() {
+    // Arrange
+    final UrlDto urlDto = new UrlDto(originalUrl, newAlias, null);
 
-    @BeforeEach
-    void setUp() {
-        ReflectionTestUtils.setField(urlService, "baseUrl", baseUrl);
-    }
+    final Url existingUrl = new Url();
+    existingUrl.setOriginalUrl(originalUrl);
+    existingUrl.setShortCode(existingShortCode);
+    existingUrl.setCreatedAt(LocalDateTime.now());
+    existingUrl.setClickCount(0);
 
-    @Test
-    void shouldUpdateAliasWhenUrlExistsAndNewAliasProvided() {
-        // Arrange
-        UrlDto urlDto = new UrlDto(originalUrl, newAlias, null);
+    when(urlRepository.findByOriginalUrl(originalUrl)).thenReturn(Optional.of(existingUrl));
+    when(urlRepository.existsByShortCode(newAlias)).thenReturn(false);
 
-        Url existingUrl = new Url();
-        existingUrl.setOriginalUrl(originalUrl);
-        existingUrl.setShortCode(existingShortCode);
-        existingUrl.setCreatedAt(LocalDateTime.now());
-        existingUrl.setClickCount(0);
+    // Act
+    final UrlResponseDto result = urlService.createShortUrl(urlDto);
 
-        when(urlRepository.findByOriginalUrl(originalUrl)).thenReturn(Optional.of(existingUrl));
-        when(urlRepository.existsByShortCode(newAlias)).thenReturn(false);
+    // Assert
+    verify(urlRepository).findByOriginalUrl(originalUrl);
+    verify(urlRepository).existsByShortCode(newAlias);
+    verify(urlRepository).save(existingUrl);
 
-        // Act
-        UrlResponseDto result = urlService.createShortUrl(urlDto);
+    assertEquals(newAlias, existingUrl.getShortCode());
+    assertEquals(newAlias, result.getShortCode());
+    assertEquals(originalUrl, result.getOriginalUrl());
+  }
 
-        // Assert
-        verify(urlRepository).findByOriginalUrl(originalUrl);
-        verify(urlRepository).existsByShortCode(newAlias);
-        verify(urlRepository).save(existingUrl);
+  @Test
+  void shouldThrowExceptionWhenNewAliasAlreadyInUse() {
+    // Arrange
+    final UrlDto urlDto = new UrlDto(originalUrl, newAlias, null);
 
-        assertEquals(newAlias, existingUrl.getShortCode());
-        assertEquals(newAlias, result.getShortCode());
-        assertEquals(originalUrl, result.getOriginalUrl());
-    }
+    final Url existingUrl = new Url();
+    existingUrl.setOriginalUrl(originalUrl);
+    existingUrl.setShortCode(existingShortCode);
+    existingUrl.setCreatedAt(LocalDateTime.now());
+    existingUrl.setClickCount(0);
 
-    @Test
-    void shouldThrowExceptionWhenNewAliasAlreadyInUse() {
-        // Arrange
-        UrlDto urlDto = new UrlDto(originalUrl, newAlias, null);
+    when(urlRepository.findByOriginalUrl(originalUrl)).thenReturn(Optional.of(existingUrl));
+    when(urlRepository.existsByShortCode(newAlias)).thenReturn(true);
 
-        Url existingUrl = new Url();
-        existingUrl.setOriginalUrl(originalUrl);
-        existingUrl.setShortCode(existingShortCode);
-        existingUrl.setCreatedAt(LocalDateTime.now());
-        existingUrl.setClickCount(0);
+    // Act & Assert
+    final UrlException exception = assertThrows(UrlException.class, () -> urlService.createShortUrl(urlDto));
+    assertEquals("Custom alias already in use", exception.getMessage());
 
-        when(urlRepository.findByOriginalUrl(originalUrl)).thenReturn(Optional.of(existingUrl));
-        when(urlRepository.existsByShortCode(newAlias)).thenReturn(true);
+    verify(urlRepository).findByOriginalUrl(originalUrl);
+    verify(urlRepository).existsByShortCode(newAlias);
+    verify(urlRepository, never()).save(any(Url.class));
+  }
 
-        // Act & Assert
-        UrlException exception = assertThrows(UrlException.class, () -> urlService.createShortUrl(urlDto));
-        assertEquals("Custom alias already in use", exception.getMessage());
+  @Test
+  void shouldNotUpdateAliasWhenSameAliasProvided() {
+    // Arrange
+    final UrlDto urlDto = new UrlDto(originalUrl, existingShortCode, null);
 
-        verify(urlRepository).findByOriginalUrl(originalUrl);
-        verify(urlRepository).existsByShortCode(newAlias);
-        verify(urlRepository, never()).save(any(Url.class));
-    }
+    final Url existingUrl = new Url();
+    existingUrl.setOriginalUrl(originalUrl);
+    existingUrl.setShortCode(existingShortCode);
+    existingUrl.setCreatedAt(LocalDateTime.now());
+    existingUrl.setClickCount(0);
 
-    @Test
-    void shouldNotUpdateAliasWhenSameAliasProvided() {
-        // Arrange
-        UrlDto urlDto = new UrlDto(originalUrl, existingShortCode, null);
+    when(urlRepository.findByOriginalUrl(originalUrl)).thenReturn(Optional.of(existingUrl));
 
-        Url existingUrl = new Url();
-        existingUrl.setOriginalUrl(originalUrl);
-        existingUrl.setShortCode(existingShortCode);
-        existingUrl.setCreatedAt(LocalDateTime.now());
-        existingUrl.setClickCount(0);
+    // Act
+    final UrlResponseDto result = urlService.createShortUrl(urlDto);
 
-        when(urlRepository.findByOriginalUrl(originalUrl)).thenReturn(Optional.of(existingUrl));
+    // Assert
+    verify(urlRepository).findByOriginalUrl(originalUrl);
+    verify(urlRepository, never()).existsByShortCode(anyString());
+    verify(urlRepository, never()).save(any(Url.class));
 
-        // Act
-        UrlResponseDto result = urlService.createShortUrl(urlDto);
+    assertEquals(existingShortCode, result.getShortCode());
+    assertEquals(originalUrl, result.getOriginalUrl());
+  }
 
-        // Assert
-        verify(urlRepository).findByOriginalUrl(originalUrl);
-        verify(urlRepository, never()).existsByShortCode(anyString());
-        verify(urlRepository, never()).save(any(Url.class));
+  @Test
+  void shouldUpdateExpirationTimeWhenUrlExistsAndNewExpirationProvided() {
+    // Arrange
+    final int expirationMinutes = 60;
+    final UrlDto urlDto = new UrlDto(originalUrl, null, expirationMinutes);
 
-        assertEquals(existingShortCode, result.getShortCode());
-        assertEquals(originalUrl, result.getOriginalUrl());
-    }
+    final LocalDateTime createdAt = LocalDateTime.now();
+    final Url existingUrl = new Url();
+    existingUrl.setOriginalUrl(originalUrl);
+    existingUrl.setShortCode(existingShortCode);
+    existingUrl.setCreatedAt(createdAt);
+    existingUrl.setClickCount(0);
 
-    @Test
-    void shouldUpdateExpirationTimeWhenUrlExistsAndNewExpirationProvided() {
-        // Arrange
-        int expirationMinutes = 60;
-        UrlDto urlDto = new UrlDto(originalUrl, null, expirationMinutes);
+    when(urlRepository.findByOriginalUrl(originalUrl)).thenReturn(Optional.of(existingUrl));
 
-        LocalDateTime createdAt = LocalDateTime.now();
-        Url existingUrl = new Url();
-        existingUrl.setOriginalUrl(originalUrl);
-        existingUrl.setShortCode(existingShortCode);
-        existingUrl.setCreatedAt(createdAt);
-        existingUrl.setClickCount(0);
+    // Act
+    final UrlResponseDto result = urlService.createShortUrl(urlDto);
 
-        when(urlRepository.findByOriginalUrl(originalUrl)).thenReturn(Optional.of(existingUrl));
+    // Assert
+    verify(urlRepository).findByOriginalUrl(originalUrl);
+    verify(urlRepository).save(existingUrl);
 
-        // Act
-        UrlResponseDto result = urlService.createShortUrl(urlDto);
+    assertEquals(existingShortCode, result.getShortCode());
+    assertEquals(originalUrl, result.getOriginalUrl());
+    assertEquals(createdAt.plusMinutes(expirationMinutes), existingUrl.getExpiresAt());
+    assertEquals(createdAt.plusMinutes(expirationMinutes), result.getExpiresAt());
+  }
 
-        // Assert
-        verify(urlRepository).findByOriginalUrl(originalUrl);
-        verify(urlRepository).save(existingUrl);
+  @Test
+  void shouldUpdateUrlExpirationByShortCode() {
+    // Arrange
+    final int expirationMinutes = 120;
 
-        assertEquals(existingShortCode, result.getShortCode());
-        assertEquals(originalUrl, result.getOriginalUrl());
-        assertEquals(createdAt.plusMinutes(expirationMinutes), existingUrl.getExpiresAt());
-        assertEquals(createdAt.plusMinutes(expirationMinutes), result.getExpiresAt());
-    }
+    final LocalDateTime createdAt = LocalDateTime.now();
+    final Url existingUrl = new Url();
+    existingUrl.setOriginalUrl(originalUrl);
+    existingUrl.setShortCode(existingShortCode);
+    existingUrl.setCreatedAt(createdAt);
+    existingUrl.setClickCount(0);
 
-    @Test
-    void shouldUpdateUrlExpirationByShortCode() {
-        // Arrange
-        int expirationMinutes = 120;
+    when(urlRepository.findByShortCode(existingShortCode)).thenReturn(Optional.of(existingUrl));
 
-        LocalDateTime createdAt = LocalDateTime.now();
-        Url existingUrl = new Url();
-        existingUrl.setOriginalUrl(originalUrl);
-        existingUrl.setShortCode(existingShortCode);
-        existingUrl.setCreatedAt(createdAt);
-        existingUrl.setClickCount(0);
+    // Act
+    final UrlResponseDto result = urlService.updateUrlExpiration(existingShortCode, expirationMinutes);
 
-        when(urlRepository.findByShortCode(existingShortCode)).thenReturn(Optional.of(existingUrl));
+    // Assert
+    verify(urlRepository).findByShortCode(existingShortCode);
+    verify(urlRepository).save(existingUrl);
 
-        // Act
-        UrlResponseDto result = urlService.updateUrlExpiration(existingShortCode, expirationMinutes);
+    assertEquals(existingShortCode, result.getShortCode());
+    assertEquals(originalUrl, result.getOriginalUrl());
+    assertEquals(createdAt.plusMinutes(expirationMinutes), existingUrl.getExpiresAt());
+    assertEquals(createdAt.plusMinutes(expirationMinutes), result.getExpiresAt());
+  }
 
-        // Assert
-        verify(urlRepository).findByShortCode(existingShortCode);
-        verify(urlRepository).save(existingUrl);
+  @Test
+  void shouldRemoveExpirationWhenNullExpirationProvided() {
+    // Arrange
+    final LocalDateTime createdAt = LocalDateTime.now();
+    final LocalDateTime originalExpiresAt = createdAt.plusMinutes(60);
 
-        assertEquals(existingShortCode, result.getShortCode());
-        assertEquals(originalUrl, result.getOriginalUrl());
-        assertEquals(createdAt.plusMinutes(expirationMinutes), existingUrl.getExpiresAt());
-        assertEquals(createdAt.plusMinutes(expirationMinutes), result.getExpiresAt());
-    }
+    final Url existingUrl = new Url();
+    existingUrl.setOriginalUrl(originalUrl);
+    existingUrl.setShortCode(existingShortCode);
+    existingUrl.setCreatedAt(createdAt);
+    existingUrl.setExpiresAt(originalExpiresAt);
+    existingUrl.setClickCount(0);
 
-    @Test
-    void shouldRemoveExpirationWhenNullExpirationProvided() {
-        // Arrange
-        LocalDateTime createdAt = LocalDateTime.now();
-        LocalDateTime originalExpiresAt = createdAt.plusMinutes(60);
+    when(urlRepository.findByShortCode(existingShortCode)).thenReturn(Optional.of(existingUrl));
 
-        Url existingUrl = new Url();
-        existingUrl.setOriginalUrl(originalUrl);
-        existingUrl.setShortCode(existingShortCode);
-        existingUrl.setCreatedAt(createdAt);
-        existingUrl.setExpiresAt(originalExpiresAt);
-        existingUrl.setClickCount(0);
+    // Act
+    final UrlResponseDto result = urlService.updateUrlExpiration(existingShortCode, null);
 
-        when(urlRepository.findByShortCode(existingShortCode)).thenReturn(Optional.of(existingUrl));
+    // Assert
+    verify(urlRepository).findByShortCode(existingShortCode);
+    verify(urlRepository).save(existingUrl);
 
-        // Act
-        UrlResponseDto result = urlService.updateUrlExpiration(existingShortCode, null);
+    assertNull(existingUrl.getExpiresAt());
+    assertNull(result.getExpiresAt());
+  }
 
-        // Assert
-        verify(urlRepository).findByShortCode(existingShortCode);
-        verify(urlRepository).save(existingUrl);
+  @Test
+  void shouldThrowExceptionWhenShortCodeNotFound() {
+    // Arrange
+    final String nonExistentShortCode = "nonexistent";
+    when(urlRepository.findByShortCode(nonExistentShortCode)).thenReturn(Optional.empty());
 
-        assertNull(existingUrl.getExpiresAt());
-        assertNull(result.getExpiresAt());
-    }
+    // Act & Assert
+    final UrlException exception = assertThrows(UrlException.class,
+      () -> urlService.updateUrlExpiration(nonExistentShortCode, 60));
+    assertEquals("URL not found! Did you generate one ?", exception.getMessage());
 
-    @Test
-    void shouldThrowExceptionWhenShortCodeNotFound() {
-        // Arrange
-        String nonExistentShortCode = "nonexistent";
-        when(urlRepository.findByShortCode(nonExistentShortCode)).thenReturn(Optional.empty());
-
-        // Act & Assert
-        UrlException exception = assertThrows(UrlException.class, 
-            () -> urlService.updateUrlExpiration(nonExistentShortCode, 60));
-        assertEquals("URL not found! Did you generate one ?", exception.getMessage());
-
-        verify(urlRepository).findByShortCode(nonExistentShortCode);
-        verify(urlRepository, never()).save(any(Url.class));
-    }
+    verify(urlRepository).findByShortCode(nonExistentShortCode);
+    verify(urlRepository, never()).save(any(Url.class));
+  }
 }

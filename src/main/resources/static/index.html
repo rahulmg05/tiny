@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <title>URL Shortener</title>
     <style>
         :root {
@@ -22,7 +22,7 @@
             --secondary-button-bg: #f0f0f0;
             --secondary-button-color: #000000;
             --error-color: #ff0000;
-            --shadow-color: rgba(0,0,0,0.1);
+            --shadow-color: rgba(0, 0, 0, 0.1);
             --small-text-color: #666;
         }
 
@@ -43,7 +43,7 @@
             --secondary-button-bg: #555555;
             --secondary-button-color: #ffffff;
             --error-color: #ff6b6b;
-            --shadow-color: rgba(0,0,0,0.3);
+            --shadow-color: rgba(0, 0, 0, 0.3);
             --small-text-color: #aaa;
         }
 
@@ -56,19 +56,23 @@
             color: var(--text-color);
             transition: background-color 0.3s, color 0.3s;
         }
+
         .container {
             border: 1px solid var(--border-color);
             padding: 20px;
             border-radius: 5px;
             background-color: var(--container-bg);
         }
+
         .form-group {
             margin-bottom: 15px;
         }
+
         label {
             display: block;
             margin-bottom: 5px;
         }
+
         input[type="url"], input[type="text"], input[type="number"] {
             width: 100%;
             padding: 8px;
@@ -78,6 +82,7 @@
             border: 1px solid var(--border-color);
             border-radius: 4px;
         }
+
         button {
             padding: 8px 15px;
             background-color: var(--button-bg);
@@ -87,9 +92,11 @@
             cursor: pointer;
             transition: background-color 0.2s;
         }
+
         button:hover {
             background-color: var(--button-hover);
         }
+
         #result {
             margin-top: 20px;
             padding: 15px;
@@ -99,6 +106,7 @@
             background-color: var(--result-bg);
             box-shadow: 0 2px 4px var(--shadow-color);
         }
+
         .url-container {
             display: flex;
             align-items: center;
@@ -108,12 +116,14 @@
             border-radius: 4px;
             border: 1px solid var(--border-color);
         }
+
         .url-link {
             flex-grow: 1;
             word-break: break-all;
             color: var(--link-color);
             font-weight: 500;
         }
+
         .copy-btn {
             margin-left: 10px;
             padding: 6px 12px;
@@ -124,9 +134,11 @@
             cursor: pointer;
             transition: background-color 0.2s;
         }
+
         .copy-btn:hover {
             background-color: var(--button-hover);
         }
+
         .info-item {
             margin-bottom: 8px;
             padding: 8px;
@@ -134,26 +146,32 @@
             border-radius: 4px;
             border: 1px solid var(--border-color);
         }
+
         .info-label {
             font-weight: bold;
             color: var(--info-label-color);
             margin-right: 5px;
         }
+
         .info-value {
             word-break: break-all;
         }
+
         .error {
             color: var(--error-color);
             margin-top: 10px;
         }
+
         small {
             color: var(--small-text-color);
         }
+
         .theme-toggle {
             display: flex;
             justify-content: flex-end;
             margin-bottom: 10px;
         }
+
         .theme-toggle-btn {
             background-color: var(--secondary-button-bg);
             color: var(--secondary-button-color);
@@ -165,213 +183,214 @@
             gap: 5px;
             font-size: 14px;
         }
+
         .theme-toggle-btn:hover {
             opacity: 0.9;
         }
     </style>
 </head>
 <body>
-    <div class="theme-toggle">
-        <button id="themeToggle" class="theme-toggle-btn">
-            <span id="themeIcon">🌙</span> <span id="themeText">Dark Mode</span>
-        </button>
+<div class="theme-toggle">
+    <button class="theme-toggle-btn" id="themeToggle">
+        <span id="themeIcon">🌙</span> <span id="themeText">Dark Mode</span>
+    </button>
+</div>
+<div class="container">
+    <h1>URL Shortener</h1>
+    <div class="form-group">
+        <label for="longUrl">Enter a long URL:</label>
+        <input id="longUrl" placeholder="https://example.com/very/long/url" required type="url">
     </div>
-    <div class="container">
-        <h1>URL Shortener</h1>
-        <div class="form-group">
-            <label for="longUrl">Enter a long URL:</label>
-            <input type="url" id="longUrl" placeholder="https://example.com/very/long/url" required>
-        </div>
-        <div class="form-group">
-            <label for="customAlias">Custom Alias (optional):</label>
-            <input type="text" id="customAlias" placeholder="e.g., my-link">
-            <small style="display: block; margin-top: 5px; color: #666;">Leave empty for a random code</small>
-        </div>
-        <div class="form-group">
-            <label for="expirationMinutes">Expiration Time (minutes, optional):</label>
-            <input type="number" id="expirationMinutes" placeholder="e.g., 60 for 1 hour" min="1">
-            <small style="display: block; margin-top: 5px; color: #666;">Leave empty for no expiration</small>
-        </div>
-        <div style="display: flex; gap: 10px;">
-            <button id="shortenBtn">Shorten URL</button>
-            <button id="clearBtn" style="background-color: #f0f0f0; color: #333;">Clear Form</button>
-        </div>
-        <div id="error" class="error"></div>
+    <div class="form-group">
+        <label for="customAlias">Custom Alias (optional):</label>
+        <input id="customAlias" placeholder="e.g., my-link" type="text">
+        <small style="display: block; margin-top: 5px; color: #666;">Leave empty for a random code</small>
+    </div>
+    <div class="form-group">
+        <label for="expirationMinutes">Expiration Time (minutes, optional):</label>
+        <input id="expirationMinutes" min="1" placeholder="e.g., 60 for 1 hour" type="number">
+        <small style="display: block; margin-top: 5px; color: #666;">Leave empty for no expiration</small>
+    </div>
+    <div style="display: flex; gap: 10px;">
+        <button id="shortenBtn">Shorten URL</button>
+        <button id="clearBtn" style="background-color: #f0f0f0; color: #333;">Clear Form</button>
+    </div>
+    <div class="error" id="error"></div>
 
-        <div id="result">
-            <h3>Your shortened URL</h3>
-            <div class="url-container">
-                <a id="shortUrl" class="url-link" href="#" target="_blank"></a>
-                <button id="copyBtn" class="copy-btn">Copy</button>
-            </div>
-            <div class="info-item">
-                <span class="info-label">Original URL:</span>
-                <span id="originalUrl" class="info-value"></span>
-            </div>
-            <div class="info-item">
-                <span class="info-label">Short Code:</span>
-                <span id="shortCodeDisplay" class="info-value"></span>
-            </div>
-            <div id="expirationInfo" class="info-item">
-                <span class="info-label">Expires:</span>
-                <span id="expiresAt" class="info-value">Never</span>
-            </div>
+    <div id="result">
+        <h3>Your shortened URL</h3>
+        <div class="url-container">
+            <a class="url-link" href="#" id="shortUrl" target="_blank"></a>
+            <button class="copy-btn" id="copyBtn">Copy</button>
+        </div>
+        <div class="info-item">
+            <span class="info-label">Original URL:</span>
+            <span class="info-value" id="originalUrl"></span>
+        </div>
+        <div class="info-item">
+            <span class="info-label">Short Code:</span>
+            <span class="info-value" id="shortCodeDisplay"></span>
+        </div>
+        <div class="info-item" id="expirationInfo">
+            <span class="info-label">Expires:</span>
+            <span class="info-value" id="expiresAt">Never</span>
         </div>
     </div>
+</div>
 
-    <script>
-        // Theme toggle functionality
-        document.addEventListener('DOMContentLoaded', function() {
-            const themeToggleBtn = document.getElementById('themeToggle');
-            const themeIcon = document.getElementById('themeIcon');
-            const themeText = document.getElementById('themeText');
-            const htmlElement = document.documentElement;
+<script>
+    // Theme toggle functionality
+    document.addEventListener('DOMContentLoaded', function () {
+        const themeToggleBtn = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+        const themeText = document.getElementById('themeText');
+        const htmlElement = document.documentElement;
 
-            // Check if user has a saved preference
-            const savedTheme = localStorage.getItem('theme');
+        // Check if user has a saved preference
+        const savedTheme = localStorage.getItem('theme');
 
-            // Apply saved theme or default to light
-            if (savedTheme === 'dark') {
-                htmlElement.classList.add('dark-mode');
+        // Apply saved theme or default to light
+        if (savedTheme === 'dark') {
+            htmlElement.classList.add('dark-mode');
+            themeIcon.textContent = '☀️';
+            themeText.textContent = 'Light Mode';
+        }
+
+        // Toggle theme when button is clicked
+        themeToggleBtn.addEventListener('click', function () {
+            // Toggle dark mode class
+            htmlElement.classList.toggle('dark-mode');
+
+            // Check if dark mode is now active
+            const isDarkMode = htmlElement.classList.contains('dark-mode');
+
+            // Update button text and icon
+            if (isDarkMode) {
                 themeIcon.textContent = '☀️';
                 themeText.textContent = 'Light Mode';
-            }
-
-            // Toggle theme when button is clicked
-            themeToggleBtn.addEventListener('click', function() {
-                // Toggle dark mode class
-                htmlElement.classList.toggle('dark-mode');
-
-                // Check if dark mode is now active
-                const isDarkMode = htmlElement.classList.contains('dark-mode');
-
-                // Update button text and icon
-                if (isDarkMode) {
-                    themeIcon.textContent = '☀️';
-                    themeText.textContent = 'Light Mode';
-                    localStorage.setItem('theme', 'dark');
-                } else {
-                    themeIcon.textContent = '🌙';
-                    themeText.textContent = 'Dark Mode';
-                    localStorage.setItem('theme', 'light');
-                }
-            });
-        });
-
-        // Store the current short URL for the copy function
-        let currentShortUrl = '';
-
-        // Set up clear button event listener
-        document.getElementById('clearBtn').addEventListener('click', function() {
-            // Clear all input fields
-            document.getElementById('longUrl').value = '';
-            document.getElementById('customAlias').value = '';
-            document.getElementById('expirationMinutes').value = '';
-
-            // Clear error message
-            document.getElementById('error').textContent = '';
-
-            // Reset result fields
-            document.getElementById('shortUrl').textContent = '';
-            document.getElementById('shortUrl').href = '#';
-            document.getElementById('originalUrl').textContent = '';
-            document.getElementById('shortCodeDisplay').textContent = '';
-            document.getElementById('expiresAt').textContent = 'Never';
-
-            // Hide result
-            document.getElementById('result').style.display = 'none';
-        });
-
-        // Set up copy button event listener
-        document.getElementById('copyBtn').addEventListener('click', function() {
-            // Create a temporary textarea element to copy from
-            const textarea = document.createElement('textarea');
-            textarea.value = currentShortUrl;
-            textarea.style.position = 'fixed';  // Prevent scrolling to bottom
-            document.body.appendChild(textarea);
-            textarea.select();
-
-            try {
-                // Execute the copy command
-                document.execCommand('copy');
-                const originalText = this.textContent;
-                this.textContent = 'Copied!';
-                setTimeout(() => {
-                    this.textContent = originalText;
-                }, 2000);
-            } catch (err) {
-                console.error('Could not copy text: ', err);
-            } finally {
-                // Clean up
-                document.body.removeChild(textarea);
+                localStorage.setItem('theme', 'dark');
+            } else {
+                themeIcon.textContent = '🌙';
+                themeText.textContent = 'Dark Mode';
+                localStorage.setItem('theme', 'light');
             }
         });
+    });
 
-        // Set up shorten button event listener
-        document.getElementById('shortenBtn').addEventListener('click', function() {
-            const longUrl = document.getElementById('longUrl').value;
-            const customAlias = document.getElementById('customAlias').value.trim();
-            const expirationMinutes = document.getElementById('expirationMinutes').value.trim();
-            const errorDiv = document.getElementById('error');
-            const resultDiv = document.getElementById('result');
+    // Store the current short URL for the copy function
+    let currentShortUrl = '';
 
-            // Reset previous results
-            errorDiv.textContent = '';
-            resultDiv.style.display = 'none';
+    // Set up clear button event listener
+    document.getElementById('clearBtn').addEventListener('click', function () {
+        // Clear all input fields
+        document.getElementById('longUrl').value = '';
+        document.getElementById('customAlias').value = '';
+        document.getElementById('expirationMinutes').value = '';
 
-            // Validate URL
-            if (!longUrl) {
-                errorDiv.textContent = 'Please enter a URL';
+        // Clear error message
+        document.getElementById('error').textContent = '';
+
+        // Reset result fields
+        document.getElementById('shortUrl').textContent = '';
+        document.getElementById('shortUrl').href = '#';
+        document.getElementById('originalUrl').textContent = '';
+        document.getElementById('shortCodeDisplay').textContent = '';
+        document.getElementById('expiresAt').textContent = 'Never';
+
+        // Hide result
+        document.getElementById('result').style.display = 'none';
+    });
+
+    // Set up copy button event listener
+    document.getElementById('copyBtn').addEventListener('click', function () {
+        // Create a temporary textarea element to copy from
+        const textarea = document.createElement('textarea');
+        textarea.value = currentShortUrl;
+        textarea.style.position = 'fixed';  // Prevent scrolling to bottom
+        document.body.appendChild(textarea);
+        textarea.select();
+
+        try {
+            // Execute the copy command
+            document.execCommand('copy');
+            const originalText = this.textContent;
+            this.textContent = 'Copied!';
+            setTimeout(() => {
+                this.textContent = originalText;
+            }, 2000);
+        } catch (err) {
+            console.error('Could not copy text: ', err);
+        } finally {
+            // Clean up
+            document.body.removeChild(textarea);
+        }
+    });
+
+    // Set up shorten button event listener
+    document.getElementById('shortenBtn').addEventListener('click', function () {
+        const longUrl = document.getElementById('longUrl').value;
+        const customAlias = document.getElementById('customAlias').value.trim();
+        const expirationMinutes = document.getElementById('expirationMinutes').value.trim();
+        const errorDiv = document.getElementById('error');
+        const resultDiv = document.getElementById('result');
+
+        // Reset previous results
+        errorDiv.textContent = '';
+        resultDiv.style.display = 'none';
+
+        // Validate URL
+        if (!longUrl) {
+            errorDiv.textContent = 'Please enter a URL';
+            return;
+        }
+
+        // Check if the URL is in a valid format
+        const urlPattern = /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/i;
+        if (!urlPattern.test(longUrl)) {
+            errorDiv.textContent = 'Invalid URL format. URL must start with http://, https://, or ftp://';
+            return;
+        }
+
+        // Validate custom alias if provided
+        if (customAlias) {
+            const aliasPattern = /^[a-zA-Z0-9_-]+$/;
+            if (!aliasPattern.test(customAlias)) {
+                errorDiv.textContent = 'Custom alias can only contain letters, numbers, hyphens, and underscores';
                 return;
             }
+        }
 
-            // Check if the URL is in a valid format
-            const urlPattern = /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/i;
-            if (!urlPattern.test(longUrl)) {
-                errorDiv.textContent = 'Invalid URL format. URL must start with http://, https://, or ftp://';
+        // Validate expiration time if provided
+        if (expirationMinutes) {
+            const expirationValue = parseInt(expirationMinutes, 10);
+            if (isNaN(expirationValue) || expirationValue <= 0) {
+                errorDiv.textContent = 'Expiration time must be a positive number';
                 return;
             }
+        }
 
-            // Validate custom alias if provided
-            if (customAlias) {
-                const aliasPattern = /^[a-zA-Z0-9_-]+$/;
-                if (!aliasPattern.test(customAlias)) {
-                    errorDiv.textContent = 'Custom alias can only contain letters, numbers, hyphens, and underscores';
-                    return;
-                }
-            }
+        // Prepare request payload
+        const payload = {
+            url: longUrl
+        };
 
-            // Validate expiration time if provided
-            if (expirationMinutes) {
-                const expirationValue = parseInt(expirationMinutes, 10);
-                if (isNaN(expirationValue) || expirationValue <= 0) {
-                    errorDiv.textContent = 'Expiration time must be a positive number';
-                    return;
-                }
-            }
+        // Add optional fields if provided
+        if (customAlias) {
+            payload.customAlias = customAlias;
+        }
 
-            // Prepare request payload
-            const payload = {
-                url: longUrl
-            };
+        if (expirationMinutes) {
+            payload.expirationMinutes = parseInt(expirationMinutes, 10);
+        }
 
-            // Add optional fields if provided
-            if (customAlias) {
-                payload.customAlias = customAlias;
-            }
-
-            if (expirationMinutes) {
-                payload.expirationMinutes = parseInt(expirationMinutes, 10);
-            }
-
-            // Call the API to shorten the URL
-            fetch('/api/urls', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(payload)
-            })
+        // Call the API to shorten the URL
+        fetch('/api/urls', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        })
             .then(response => {
                 if (!response.ok) {
                     // Try to get more detailed error information
@@ -436,7 +455,7 @@
                 // Display the error message to the user
                 errorDiv.textContent = error.message;
             });
-        });
-    </script>
+    });
+</script>
 </body>
 </html>
