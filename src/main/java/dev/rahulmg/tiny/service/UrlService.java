@@ -190,30 +190,4 @@ public class UrlService {
 
     return url.getOriginalUrl();
   }
-
-  /**
-   * Update the expiration time of a URL by its short code.
-   *
-   * @param shortCode         the short code of the URL to update
-   * @param expirationMinutes the new expiration time in minutes (null means no expiration)
-   * @return the updated URL information
-   * @throws UrlException if the URL is not found
-   */
-  @Transactional
-  public UrlResponseDto updateUrlExpiration(final String shortCode, final Integer expirationMinutes) {
-    final Url url = urlRepository.findByShortCode(shortCode)
-      .orElseThrow(() -> new UrlException("URL not found! Did you generate one ?"));
-
-    // Calculate new expiration time
-    LocalDateTime expiresAt = null;
-    if (!ObjectUtils.isEmpty(expirationMinutes) && expirationMinutes > 0) {
-      expiresAt = url.getCreatedAt().plusMinutes(expirationMinutes);
-    }
-
-    // Update expiration time
-    url.setExpiresAt(expiresAt);
-    urlRepository.save(url);
-
-    return UrlResponseDto.of(url.getOriginalUrl(), url.getShortCode(), baseUrl, url.getCreatedAt(), url.getExpiresAt());
-  }
 }
