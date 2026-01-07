@@ -1,28 +1,36 @@
 package dev.rahulmg.tiny.model;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Index;
+import jakarta.persistence.Table;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.cassandra.core.mapping.Column;
-import org.springframework.data.cassandra.core.mapping.PrimaryKey;
-import org.springframework.data.cassandra.core.mapping.Table;
 
 /**
- * Entity representing a URL mapping in Cassandra.
+ * Entity representing a URL mapping in the database.
  */
 @Data
 @NoArgsConstructor
-@Table("url_mapping")
+@Entity
+@Table(name = "url_mapping", indexes = @Index(
+    name = "idx_url_mapping_expires_at", columnList = "expires_at"))
 public class UrlMapping {
 
-  @PrimaryKey
+  @Id
   private String shortCode;
 
-  @Column("original_url")
+  @Column(name = "original_url")
   private String originalUrl;
 
-  @Column("created_at")
+  @Column(name = "created_at")
   private Instant createdAt;
+
+  @Column(name = "expires_at")
+  private Instant expiresAt;
 
   /**
    * Constructs a new UrlMapping.
@@ -34,5 +42,6 @@ public class UrlMapping {
     this.shortCode = shortCode;
     this.originalUrl = originalUrl;
     this.createdAt = Instant.now();
+    this.expiresAt = this.createdAt.plus(30, ChronoUnit.DAYS);
   }
 }

@@ -1,11 +1,11 @@
 package dev.rahulmg.tiny.service;
 
 import dev.rahulmg.tiny.model.UrlMapping;
+import dev.rahulmg.tiny.repository.UrlMappingRepository;
 import java.security.SecureRandom;
 import java.util.Base64;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.cassandra.core.CassandraTemplate;
-import org.springframework.data.cassandra.core.InsertOptions;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 /**
@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class UrlService {
 
-  private final CassandraTemplate cassandraTemplate;
+  private final UrlMappingRepository urlMappingRepository;
   private final SecureRandom secureRandom = new SecureRandom();
 
   /**
@@ -34,15 +34,13 @@ public class UrlService {
       shortCode = generateShortCode();
       final UrlMapping mapping = new UrlMapping(shortCode, originalUrl);
 
-      // Use LWT (Lightweight Transaction) to ensure we don't overwrite an existing code
-      // IF NOT EXISTS
-      final var writeResult = cassandraTemplate.insert(mapping,
-          InsertOptions.builder().withIfNotExists().build());
-
-      inserted = writeResult.wasApplied();
-
-      if (inserted) {
+      try {
+        urlMappingRepository.save(mapping);
+        inserted = true;
         return shortCode;
+      } catch (final DataIntegrityViolationException e) {
+        // Collision detected, retry with a new code
+        inserted = false;
       }
     }
 
