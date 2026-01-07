@@ -3,6 +3,7 @@ package dev.rahulmg.tiny.controller;
 import dev.rahulmg.tiny.dto.CreateUrlRequest;
 import dev.rahulmg.tiny.dto.CreateUrlResponse;
 import dev.rahulmg.tiny.service.UrlService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -15,18 +16,10 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
  */
 @RestController
 @RequestMapping("/api/v1/urls")
+@RequiredArgsConstructor
 public class UrlController {
 
   private final UrlService urlService;
-
-  /**
-   * Constructs a new UrlController.
-   *
-   * @param urlService The UrlService to use.
-   */
-  public UrlController(final UrlService urlService) {
-    this.urlService = urlService;
-  }
 
   /**
    * Creates a short URL from a long URL.

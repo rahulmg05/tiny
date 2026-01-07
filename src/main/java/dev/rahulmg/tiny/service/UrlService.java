@@ -3,6 +3,7 @@ package dev.rahulmg.tiny.service;
 import dev.rahulmg.tiny.model.UrlMapping;
 import java.security.SecureRandom;
 import java.util.Base64;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.cassandra.core.CassandraTemplate;
 import org.springframework.data.cassandra.core.InsertOptions;
 import org.springframework.stereotype.Service;
@@ -11,19 +12,11 @@ import org.springframework.stereotype.Service;
  * Service for managing URL shortenings.
  */
 @Service
+@RequiredArgsConstructor
 public class UrlService {
 
   private final CassandraTemplate cassandraTemplate;
   private final SecureRandom secureRandom = new SecureRandom();
-
-  /**
-   * Constructs a new UrlService.
-   *
-   * @param cassandraTemplate The CassandraTemplate for data access.
-   */
-  public UrlService(final CassandraTemplate cassandraTemplate) {
-    this.cassandraTemplate = cassandraTemplate;
-  }
 
   /**
    * Generates a short URL for the given original URL.

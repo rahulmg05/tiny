@@ -1,6 +1,8 @@
 package dev.rahulmg.tiny.model;
 
 import java.time.Instant;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.data.cassandra.core.mapping.Column;
 import org.springframework.data.cassandra.core.mapping.PrimaryKey;
 import org.springframework.data.cassandra.core.mapping.Table;
@@ -8,6 +10,8 @@ import org.springframework.data.cassandra.core.mapping.Table;
 /**
  * Entity representing a URL mapping in Cassandra.
  */
+@Data
+@NoArgsConstructor
 @Table("url_mapping")
 public class UrlMapping {
 
@@ -21,12 +25,6 @@ public class UrlMapping {
   private Instant createdAt;
 
   /**
-   * Default constructor for Spring Data Cassandra.
-   */
-  public UrlMapping() {
-  }
-
-  /**
    * Constructs a new UrlMapping.
    *
    * @param shortCode   The unique short code.
@@ -36,29 +34,5 @@ public class UrlMapping {
     this.shortCode = shortCode;
     this.originalUrl = originalUrl;
     this.createdAt = Instant.now();
-  }
-
-  public String getShortCode() {
-    return shortCode;
-  }
-
-  public void setShortCode(final String shortCode) {
-    this.shortCode = shortCode;
-  }
-
-  public String getOriginalUrl() {
-    return originalUrl;
-  }
-
-  public void setOriginalUrl(final String originalUrl) {
-    this.originalUrl = originalUrl;
-  }
-
-  public Instant getCreatedAt() {
-    return createdAt;
-  }
-
-  public void setCreatedAt(final Instant createdAt) {
-    this.createdAt = createdAt;
   }
 }
