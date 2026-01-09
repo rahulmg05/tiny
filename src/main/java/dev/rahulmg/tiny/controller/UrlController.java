@@ -3,6 +3,7 @@ package dev.rahulmg.tiny.controller;
 import dev.rahulmg.tiny.dto.CreateUrlRequest;
 import dev.rahulmg.tiny.dto.CreateUrlResponse;
 import dev.rahulmg.tiny.service.UrlService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -29,7 +30,7 @@ public class UrlController {
    */
   @PostMapping
   public ResponseEntity<CreateUrlResponse> createShortUrl(
-      final @RequestBody CreateUrlRequest request) {
+      final @Valid @RequestBody CreateUrlRequest request) {
     final String shortCode = urlService.shortenUrl(request.originalUrl());
 
     // Construct the full URL. In a real scenario, the base URL might be configured.
