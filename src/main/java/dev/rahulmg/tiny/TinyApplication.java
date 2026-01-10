@@ -2,11 +2,13 @@ package dev.rahulmg.tiny;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
  * The entry point for the Tiny application.
  */
 @SpringBootApplication
+@EnableScheduling
 public class TinyApplication {
 
   /**

@@ -19,4 +19,11 @@ public interface UrlMappingRepository extends JpaRepository<UrlMapping, String> 
    * @return An Optional containing the UrlMapping if found and valid, otherwise empty.
    */
   Optional<UrlMapping> findByShortCodeAndExpiresAtAfter(String shortCode, Instant now);
+
+  /**
+   * Deletes all UrlMappings that have expired before the given time.
+   *
+   * @param now The current time.
+   */
+  void deleteByExpiresAtBefore(Instant now);
 }
