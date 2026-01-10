@@ -64,12 +64,3 @@ Redirects the client to the original URL associated with the short code.
 **Example Usage:**
 Open `http://localhost:8080/api/v1/urls/aX9zP1` in a browser.
 
-## Running Locally
-
-1.  **Prerequisites:** Java 25, Docker (for database).
-2.  **Database:** Ensure a PostgreSQL instance is running and configured in `application.properties`.
-3.  **Build & Run:**
-    ```bash
-    ./mvnw clean package
-    java -jar target/tiny-0.0.1-SNAPSHOT.jar
-    ```
