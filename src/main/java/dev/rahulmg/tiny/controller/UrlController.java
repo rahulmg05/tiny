@@ -2,6 +2,7 @@ package dev.rahulmg.tiny.controller;
 
 import dev.rahulmg.tiny.dto.CreateUrlRequest;
 import dev.rahulmg.tiny.dto.CreateUrlResponse;
+import dev.rahulmg.tiny.exception.AliasAlreadyTakenException;
 import dev.rahulmg.tiny.service.UrlService;
 import jakarta.validation.Valid;
 import java.net.URI;
@@ -9,6 +10,7 @@ import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -36,7 +38,7 @@ public class UrlController {
   @PostMapping
   public ResponseEntity<CreateUrlResponse> createShortUrl(
       final @Valid @RequestBody CreateUrlRequest request) {
-    final String shortCode = urlService.shortenUrl(request.originalUrl());
+    final String shortCode = urlService.shortenUrl(request.originalUrl(), request.alias());
 
     // Construct the full URL. In a real scenario, the base URL might be configured.
     // For now, we use the current request's base URI.
@@ -64,5 +66,16 @@ public class UrlController {
     } catch (final NoSuchElementException e) {
       return ResponseEntity.notFound().build();
     }
+  }
+
+  /**
+   * Handles AliasAlreadyTakenException.
+   *
+   * @param e The exception.
+   * @return A 409 Conflict response.
+   */
+  @ExceptionHandler(AliasAlreadyTakenException.class)
+  public ResponseEntity<String> handleAliasTaken(final AliasAlreadyTakenException e) {
+    return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
   }
 }

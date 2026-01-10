@@ -1,5 +1,6 @@
 package dev.rahulmg.tiny.service;
 
+import dev.rahulmg.tiny.exception.AliasAlreadyTakenException;
 import dev.rahulmg.tiny.model.UrlMapping;
 import dev.rahulmg.tiny.repository.UrlMappingRepository;
 import java.security.SecureRandom;
@@ -21,12 +22,40 @@ public class UrlService {
   private final SecureRandom secureRandom = new SecureRandom();
 
   /**
+   * Generates a short URL for the given original URL, optionally using a custom alias.
+   *
+   * @param originalUrl The original long URL.
+   * @param alias       Optional custom alias.
+   * @return The short code (either generated or the custom alias).
+   * @throws AliasAlreadyTakenException if the custom alias is already in use.
+   */
+  public String shortenUrl(final String originalUrl, final String alias) {
+    if (alias != null && !alias.isBlank()) {
+      return createWithCustomAlias(originalUrl, alias);
+    }
+    return createWithRandomCode(originalUrl);
+  }
+
+  /**
    * Generates a short URL for the given original URL.
    *
    * @param originalUrl The original long URL.
    * @return The generated short code.
    */
   public String shortenUrl(final String originalUrl) {
+    return shortenUrl(originalUrl, null);
+  }
+
+  private String createWithCustomAlias(final String originalUrl, final String alias) {
+    if (urlMappingRepository.existsById(alias)) {
+      throw new AliasAlreadyTakenException("Alias '" + alias + "' is already taken");
+    }
+    final UrlMapping mapping = new UrlMapping(alias, originalUrl);
+    urlMappingRepository.save(mapping);
+    return alias;
+  }
+
+  private String createWithRandomCode(final String originalUrl) {
     String shortCode;
     boolean inserted = false;
 
@@ -45,7 +74,6 @@ public class UrlService {
         inserted = false;
       }
     }
-
     throw new RuntimeException("Failed to generate a unique short code after multiple attempts");
   }
 
