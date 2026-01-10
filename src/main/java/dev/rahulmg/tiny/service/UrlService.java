@@ -5,6 +5,7 @@ import dev.rahulmg.tiny.model.UrlMapping;
 import dev.rahulmg.tiny.repository.UrlMappingRepository;
 import java.security.SecureRandom;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Base64;
 import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
@@ -22,18 +23,22 @@ public class UrlService {
   private final SecureRandom secureRandom = new SecureRandom();
 
   /**
-   * Generates a short URL for the given original URL, optionally using a custom alias.
+   * Generates a short URL for the given original URL, optionally using a custom alias
+   * and expiration.
    *
    * @param originalUrl The original long URL.
    * @param alias       Optional custom alias.
+   * @param expiresAt   Optional custom expiration date.
    * @return The short code (either generated or the custom alias).
    * @throws AliasAlreadyTakenException if the custom alias is already in use.
    */
-  public String shortenUrl(final String originalUrl, final String alias) {
+  public String shortenUrl(final String originalUrl, final String alias, final Instant expiresAt) {
+    final Instant effectiveExpiresAt = determineExpiration(expiresAt);
+
     if (alias != null && !alias.isBlank()) {
-      return createWithCustomAlias(originalUrl, alias);
+      return createWithCustomAlias(originalUrl, alias, effectiveExpiresAt);
     }
-    return createWithRandomCode(originalUrl);
+    return createWithRandomCode(originalUrl, effectiveExpiresAt);
   }
 
   /**
@@ -43,19 +48,21 @@ public class UrlService {
    * @return The generated short code.
    */
   public String shortenUrl(final String originalUrl) {
-    return shortenUrl(originalUrl, null);
+    return shortenUrl(originalUrl, null, null);
   }
 
-  private String createWithCustomAlias(final String originalUrl, final String alias) {
+  private String createWithCustomAlias(final String originalUrl, final String alias,
+      final Instant expiresAt) {
     if (urlMappingRepository.existsById(alias)) {
       throw new AliasAlreadyTakenException("Alias '" + alias + "' is already taken");
     }
     final UrlMapping mapping = new UrlMapping(alias, originalUrl);
+    mapping.setExpiresAt(expiresAt);
     urlMappingRepository.save(mapping);
     return alias;
   }
 
-  private String createWithRandomCode(final String originalUrl) {
+  private String createWithRandomCode(final String originalUrl, final Instant expiresAt) {
     String shortCode;
     boolean inserted = false;
 
@@ -64,6 +71,7 @@ public class UrlService {
     while (!inserted) {
       shortCode = generateShortCode();
       final UrlMapping mapping = new UrlMapping(shortCode, originalUrl);
+      mapping.setExpiresAt(expiresAt);
 
       try {
         urlMappingRepository.save(mapping);
@@ -75,6 +83,17 @@ public class UrlService {
       }
     }
     throw new RuntimeException("Failed to generate a unique short code after multiple attempts");
+  }
+
+  private Instant determineExpiration(final Instant requestedExpiresAt) {
+    final Instant now = Instant.now();
+    final Instant maxExpiration = now.plus(30, ChronoUnit.DAYS);
+    // Default to 15 days if not provided
+    if (requestedExpiresAt == null) {
+      return now.plus(15, ChronoUnit.DAYS);
+    }
+    // Clamp to max 30 days
+    return requestedExpiresAt.isAfter(maxExpiration) ? maxExpiration : requestedExpiresAt;
   }
 
   /**

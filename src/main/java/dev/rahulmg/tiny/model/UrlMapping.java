@@ -42,6 +42,6 @@ public class UrlMapping {
     this.shortCode = shortCode;
     this.originalUrl = originalUrl;
     this.createdAt = Instant.now();
-    this.expiresAt = this.createdAt.plus(30, ChronoUnit.DAYS);
+    this.expiresAt = this.createdAt.plus(15, ChronoUnit.DAYS);
   }
 }

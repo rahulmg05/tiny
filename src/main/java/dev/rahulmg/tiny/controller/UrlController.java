@@ -38,7 +38,8 @@ public class UrlController {
   @PostMapping
   public ResponseEntity<CreateUrlResponse> createShortUrl(
       final @Valid @RequestBody CreateUrlRequest request) {
-    final String shortCode = urlService.shortenUrl(request.originalUrl(), request.alias());
+    final String shortCode = urlService.shortenUrl(
+        request.originalUrl(), request.alias(), request.expiresAt());
 
     // Construct the full URL. In a real scenario, the base URL might be configured.
     // For now, we use the current request's base URI.
